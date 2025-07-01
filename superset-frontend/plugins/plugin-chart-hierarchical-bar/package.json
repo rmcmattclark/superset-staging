@@ -1,0 +1,24 @@
+{
+  "name": "@superset-ui/plugin-chart-hierarchical-bar",
+  "version": "1.0.0",
+  "description": "A Bar Chart with drilldown capabilities.",
+  "main": "lib/index.js",
+  "scripts": {
+  "build": "tsc -p tsconfig.json"
+  },
+  "module": "esm/index.js",
+  "private": true,
+  "peerDependencies": {
+    "@superset-ui/chart-controls": "*",
+    "@superset-ui/core": "*",
+    "d3-array": "*",
+    "dayjs": "*",
+    "echarts": "*",
+    "lodash": "*",
+    "memoize-one": "*",
+    "react": "^16.14.0"
+  },
+  "devDependencies": {
+    "@types/echarts": "^4.9.22"
+  }
+}
