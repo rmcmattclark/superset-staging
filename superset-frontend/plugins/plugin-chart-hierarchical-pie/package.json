@@ -1,7 +1,7 @@
 {
-  "name": "@superset-ui/plugin-chart-hierarchical-bar",
+  "name": "@superset-ui/plugin-chart-hierarchical-pie",
   "version": "1.0.0",
-  "description": "A Bar Chart with drilldown capabilities.",
+  "description": "A Pie Chart with drilldown capabilities.",
   "main": "lib/index.js",
   "scripts": {
   "build": "tsc -p tsconfig.json"
@@ -16,7 +16,7 @@
     "echarts": "*",
     "lodash": "*",
     "memoize-one": "*",
-    "react": "^16.14.0"
+    "react": "^17.0.2"
   },
   "devDependencies": {
     "@types/echarts": "^4.9.22"

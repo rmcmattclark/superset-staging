@@ -16,7 +16,7 @@
     "echarts": "*",
     "lodash": "*",
     "memoize-one": "*",
-    "react": "^16.14.0"
+    "react": "^17.0.2"
   },
   "devDependencies": {
     "@types/echarts": "^4.9.22"
