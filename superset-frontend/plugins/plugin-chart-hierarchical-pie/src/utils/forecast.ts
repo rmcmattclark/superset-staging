@@ -34,10 +34,12 @@ export const extractForecastSeriesContext = (
 ): ForecastSeriesContext => {
   const name = seriesName as string;
   const regexMatch = seriesTypeRegex.exec(name);
-  if (!regexMatch) return { name, type: ForecastSeriesEnum.Observation };
+  if (!regexMatch)
+    return { name, type: ForecastSeriesEnum.Observation, value: [] };
   return {
     name: regexMatch[1],
     type: regexMatch[2] as ForecastSeriesEnum,
+    value: [],
   };
 };
 

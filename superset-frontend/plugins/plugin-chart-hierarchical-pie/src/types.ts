@@ -125,3 +125,44 @@ export const DEFAULT_FORM_DATA: DrilldownPieFormData = {
   innerRadius: 30,
   outerRadius: 70,
 };
+
+export enum ForecastSeriesEnum {
+  Observation = '__observation',
+  ForecastTrend = '__forecast_trend',
+  ForecastLower = '__forecast_lower',
+  ForecastUpper = '__forecast_upper',
+}
+
+export interface ForecastSeriesContext {
+  name: string;
+  type: ForecastSeriesEnum;
+  value: number[];
+}
+
+export interface ForecastValue {
+  observation?: number;
+  forecastTrend?: number;
+  forecastLower?: number;
+  forecastUpper?: number;
+  marker?: string;
+}
+
+// Chart series type (line, bar, etc.)
+export const enum EchartsTimeseriesSeriesType {
+  Line = 'line',
+  Bar = 'bar',
+  Scatter = 'scatter',
+  Smooth = 'smooth',
+  Step = 'step',
+}
+
+// Legend types used in ECharts charts
+export type LegendType = 'scroll' | 'plain';
+
+// Stack type for stacking series
+export type StackType = 'stack' | 'expand' | 'none';
+
+export interface Refs {
+  divRef: React.RefObject<HTMLDivElement>;
+  echartRef: { current: echarts.ECharts | null };
+}

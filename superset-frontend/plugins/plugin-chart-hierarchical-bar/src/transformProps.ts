@@ -9,16 +9,14 @@
  *
  * http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * Unless required by applicable law of an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY
  * KIND, either express or implied.  See the License for the
  * specific language governing permissions and limitations
  * under the License.
  */
 
 import {
-  Behavior,
   CategoricalColorNamespace,
   ChartProps,
   DataRecord,
@@ -27,16 +25,15 @@ import {
   getNumberFormatter,
   getValueFormatter,
   NumberFormats,
-  t,
   ValueFormatter,
   ChartDataResponseResult,
 } from '@superset-ui/core';
 
 import type { BarSeriesOption, EChartsOption } from 'echarts';
 import type { CallbackDataParams } from 'echarts/types/dist/shared';
-import { LegendOrientation } from './types';
+import { LegendOrientation } from '@superset-ui/plugin-chart-echarts';
 import {
-  DEFAULT_FORM_DATA,
+  DEFAULT_FORM_DATA, // <-- This now correctly points to your local file
   DrilldownBarFormData,
   BarChartTransformedProps,
   BarChartDataItem,
@@ -44,13 +41,13 @@ import {
 } from './types';
 import {
   extractGroupbyLabel,
-  getChartPadding,
   getColtypesMapping,
   getLegendProps,
   sanitizeHtml,
 } from './utils/series';
 import { defaultGrid } from './defaults';
-import { convertInteger } from './utils/convertInteger';
+import { LegendType } from '@superset-ui/plugin-chart-echarts';
+import { ensureIsCurrency } from './constants';
 
 const percentFormatter = getNumberFormatter(NumberFormats.PERCENT_2_POINT);
 
@@ -75,8 +72,7 @@ export function parseParams({
 export default function transformProps(
   chartProps: ChartProps<DrilldownBarFormData>,
 ): BarChartTransformedProps {
-  const { width, height, queriesData, formData, filterState, hooks, theme } =
-    chartProps;
+  const { width, height, queriesData, formData, theme } = chartProps;
 
   const { data = [] } = queriesData[0];
   const coltypeMapping = getColtypesMapping(
@@ -87,30 +83,33 @@ export default function transformProps(
     groupby,
     metric,
     colorScheme,
-    showLegend,
+    legendState,
     legendType,
     legendOrientation,
     showLabels,
     labelType,
     labelRotation,
-    stackBars,
-    threshold_for_other,
-    columnFormats,
-    currencyFormat,
-    currencyFormats,
-    numberFormat,
+    stack,
+    columnFormats = {} as Record<string, string>,
+    numberFormat = '' as string,
+    currencyFormat = '' as string,
   } = { ...DEFAULT_FORM_DATA, ...formData };
 
-  const groupbyLabels = groupby.map(getColumnLabel);
+  const showLegend = legendState === 'on';
+
+  const groupbyLabels = (groupby || []).map(getColumnLabel);
   const metricLabel = metric ? getMetricLabel(metric) : '';
-  const metricKey = typeof metric === 'string' ? metric : (metric?.label ?? '');
+  const metricKey =
+    typeof metric === 'string'
+      ? metric
+      : (metric as unknown as { label?: string })?.label || '';
 
   const numberFormatter = getValueFormatter(
     metricKey,
-    currencyFormats ?? {},
+    formData.currency_formats ?? {},
     columnFormats ?? {},
     numberFormat,
-    currencyFormat,
+    ensureIsCurrency(currencyFormat),
   );
 
   const colorFn = CategoricalColorNamespace.getScale(colorScheme as string);
@@ -131,35 +130,6 @@ export default function transformProps(
     };
   });
 
-  // const series = {
-  //   type: 'bar',
-  //   data: transformedData,
-  //   label: {
-  //     show: showLabels,
-  //     rotate: labelRotation,
-  //     formatter: (params: CallbackDataParams) => {
-  //       const [name, formattedValue, formattedPercent] = parseParams({
-  //         params,
-  //         numberFormatter,
-  //       });
-  //       switch (labelType) {
-  //         case EchartsBarLabelType.Category:
-  //           return name;
-  //         case EchartsBarLabelType.Value:
-  //           return formattedValue;
-  //         case EchartsBarLabelType.CategoryValue:
-  //           return `${name}: ${formattedValue}`;
-  //         default:
-  //           return '';
-  //       }
-  //     },
-  //   },
-  //   emphasis: {
-  //     focus: 'series',
-  //   },
-  //   stack: stackBars ? 'total' : undefined,
-  // };
-
   const series: BarSeriesOption = {
     type: 'bar',
     data: transformedData,
@@ -167,16 +137,16 @@ export default function transformProps(
       show: showLabels,
       rotate: labelRotation,
       formatter: (params: CallbackDataParams) => {
-        const [name, formattedValue, formattedPercent] = parseParams({
+        const [name, formattedValue] = parseParams({
           params,
           numberFormatter,
         });
         switch (labelType) {
-          case EchartsBarLabelType.Category:
+          case EchartsBarLabelType.Key:
             return name;
           case EchartsBarLabelType.Value:
             return formattedValue;
-          case EchartsBarLabelType.CategoryValue:
+          case EchartsBarLabelType.KeyValue:
             return `${name}: ${formattedValue}`;
           default:
             return '';
@@ -186,7 +156,7 @@ export default function transformProps(
     emphasis: {
       focus: 'series',
     },
-    stack: stackBars ? 'total' : undefined,
+    stack: stack ? 'total' : undefined,
   };
 
   const echartOptions: EChartsOption = {
@@ -196,7 +166,7 @@ export default function transformProps(
       axisPointer: { type: 'shadow' },
     },
     legend: getLegendProps(
-      legendType,
+      legendType as LegendType,
       (legendOrientation as LegendOrientation) ?? LegendOrientation.Top,
       showLegend ?? false,
       theme,
@@ -219,7 +189,7 @@ export default function transformProps(
     echartOptions,
     drilldownData: {
       sourceData: data,
-      hierarchy: groupby,
+      hierarchy: groupbyLabels,
       metric: metricLabel,
     },
     hooks: {

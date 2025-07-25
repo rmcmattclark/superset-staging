@@ -16,13 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, {
-  useState,
-  useMemo,
-  useCallback,
-  useRef,
-  type RefObject,
-} from 'react';
+import { useState, useMemo, useRef, type RefObject } from 'react';
 import {
   Behavior,
   DataRecord,
@@ -37,7 +31,6 @@ import {
 import Echart from '../../plugin-chart-echarts/src/components/Echart';
 import { BarChartTransformedProps } from './types';
 import type { EchartsHandler } from '@superset-ui/plugin-chart-echarts/src/types';
-import type { EChartsType } from 'echarts';
 
 // Helper function to aggregate data for the current drilldown level
 const getChartData = (
@@ -224,10 +217,16 @@ export default function DrilldownBarChart(props: BarChartTransformedProps) {
   };
 
   const fallbackRef = useRef<EchartsHandler>(null);
-  const echartRef =
-    refs && 'current' in refs && 'getEchartInstance' in (refs.current ?? {})
-      ? (refs as unknown as RefObject<EchartsHandler>)
-      : fallbackRef;
+  const isValidEchartRef =
+    refs &&
+    'current' in refs &&
+    typeof refs.current === 'object' &&
+    refs.current !== null &&
+    'getEchartInstance' in refs.current;
+
+  const echartRef = isValidEchartRef
+    ? (refs as unknown as RefObject<EchartsHandler>)
+    : fallbackRef;
 
   const safeRefObject = { echartRef };
 

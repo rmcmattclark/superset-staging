@@ -20,11 +20,11 @@ import { Behavior, ChartMetadata, ChartPlugin, t } from '@superset-ui/core';
 import transformProps from './transformProps';
 import controlPanel from './controlPanel'; // CORRECT: Import controlPanel directly
 import thumbnail from './images/thumbnail.png';
-import { DrilldownPieFormData, PieChartTransformedProps } from './types';
+import { DrilldownBarFormData, BarChartTransformedProps } from './types';
 
-export default class HierarchicalPieChartPlugin extends ChartPlugin<
-  DrilldownPieFormData,
-  PieChartTransformedProps
+export default class HierarchicalBarChartPlugin extends ChartPlugin<
+  DrilldownBarFormData,
+  BarChartTransformedProps
 > {
   constructor() {
     super({

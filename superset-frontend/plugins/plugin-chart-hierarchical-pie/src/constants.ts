@@ -59,3 +59,29 @@ export const DEFAULT_FORM_DATA = {
   truncateXAxis: true,
   xAxisBounds: [null, null],
 };
+
+// Tooltip positioning constants used to prevent overflow clipping
+export const TOOLTIP_OVERFLOW_MARGIN = 8;
+export const TOOLTIP_POINTER_MARGIN = 16;
+
+// plugins/plugin-chart-hierarchical-pie/src/constants.ts
+
+export const NULL_STRING = 'NULL';
+
+// plugins/plugin-chart-hierarchical-pie/src/constants.ts
+
+// Stack control options
+export enum StackControlsValue {
+  NoStacked = 'no',
+  Stacked = 'stack',
+  Expand = 'expand',
+}
+
+export const TIMESERIES_CONSTANTS = {
+  legendRightTopOffset: 20,
+  legendTopRightOffset: 20,
+  gridOffsetRight: 50,
+  gridOffsetLeft: 10,
+  gridOffsetBottom: 40,
+  gridOffsetTop: 10,
+};

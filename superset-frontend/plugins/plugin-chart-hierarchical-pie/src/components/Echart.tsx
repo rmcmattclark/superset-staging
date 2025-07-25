@@ -62,8 +62,12 @@ import {
   MarkLineComponent,
 } from 'echarts/components';
 import { LabelLayout } from 'echarts/features';
-import { EchartsHandler, EchartsProps, EchartsStylesProps } from '../types';
-import { DEFAULT_LOCALE } from '../constants';
+import {
+  EchartsHandler,
+  EchartsProps,
+  EchartsStylesProps,
+} from '@superset-ui/plugin-chart-echarts';
+import { DEFAULT_LOCALE } from '@superset-ui/plugin-chart-echarts/src/constants';
 
 // Define this interface here to avoid creating a dependency back to superset-frontend,
 // TODO: to move the type to @superset-ui/core

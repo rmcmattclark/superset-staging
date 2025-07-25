@@ -22,7 +22,7 @@ import type { TooltipMarker } from 'echarts/types/src/util/format';
 import {
   ForecastSeriesContext,
   ForecastSeriesEnum,
-  ForecastValue,
+  ForecastTooltipData,
 } from '../types';
 import { sanitizeHtml } from './series';
 
@@ -34,10 +34,13 @@ export const extractForecastSeriesContext = (
 ): ForecastSeriesContext => {
   const name = seriesName as string;
   const regexMatch = seriesTypeRegex.exec(name);
-  if (!regexMatch) return { name, type: ForecastSeriesEnum.Observation };
+  if (!regexMatch)
+    return { name, type: ForecastSeriesEnum.Observation, value: [] };
+
   return {
     name: regexMatch[1],
     type: regexMatch[2] as ForecastSeriesEnum,
+    value: [],
   };
 };
 
@@ -57,8 +60,8 @@ export const extractForecastSeriesContexts = (
 export const extractForecastValuesFromTooltipParams = (
   params: any[],
   isHorizontal = false,
-): Record<string, ForecastValue> => {
-  const values: Record<string, ForecastValue> = {};
+): Record<string, ForecastTooltipData> => {
+  const values: Record<string, ForecastTooltipData> = {};
   params.forEach(param => {
     const { marker, seriesId, value } = param;
     const context = extractForecastSeriesContext(seriesId);
@@ -68,7 +71,7 @@ export const extractForecastValuesFromTooltipParams = (
         values[context.name] = {
           marker: marker || '',
         };
-      const forecastValues = values[context.name];
+      const forecastValues = values[context.name] as ForecastTooltipData;
       if (context.type === ForecastSeriesEnum.Observation)
         forecastValues.observation = numericValue;
       if (context.type === ForecastSeriesEnum.ForecastTrend)
@@ -90,7 +93,7 @@ export const formatForecastTooltipSeries = ({
   forecastUpper,
   marker,
   formatter,
-}: ForecastValue & {
+}: ForecastTooltipData & {
   seriesName: string;
   marker: TooltipMarker;
   formatter: ValueFormatter;

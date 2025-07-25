@@ -17,7 +17,6 @@
  * under the License.
  */
 import {
-  Behavior,
   CategoricalColorNamespace,
   ChartProps,
   DataRecord,
@@ -39,7 +38,6 @@ import {
 
 import type { EChartsOption } from 'echarts';
 import type { CallbackDataParams } from 'echarts/types/dist/shared';
-import type { LegendComponentOption } from 'echarts/components';
 import { LegendOrientation } from './types';
 
 // type AnyParams = {
@@ -79,6 +77,14 @@ import {
 } from './utils/series';
 import { defaultGrid } from './defaults';
 import { convertInteger } from './utils/convertInteger';
+
+import type { Currency } from '@superset-ui/core';
+
+import { LegendType } from '@superset-ui/plugin-chart-echarts';
+
+function ensureIsCurrency(input: string | null | undefined): Currency {
+  return (input ?? 'USD') as unknown as Currency;
+}
 
 const percentFormatter = getNumberFormatter(NumberFormats.PERCENT_2_POINT);
 
@@ -159,8 +165,6 @@ export default function transformProps(
     filterState,
     datasource,
     formData,
-    hooks,
-    behaviors,
   } = chartProps as ChartProps<DrilldownPieFormData> & {
     hooks: {
       setDataMask: (mask: any) => void;
@@ -185,24 +189,26 @@ export default function transformProps(
     innerRadius,
     labelsOutside,
     labelLine,
-    labelType,
-    legendMargin,
-    legendOrientation,
-    legendType,
-    metric,
-    numberFormat,
-    currencyFormat,
-    dateFormat,
-    outerRadius,
+    labelType = '' as string,
+    legendMargin = null as number | null,
+    legendOrientation = '' as string,
+    legendType: rawLegendType,
+    metric = '' as string,
+    numberFormat = '' as string,
+    currencyFormat = '' as string,
+    dateFormat = '' as string,
+    outerRadius = 0 as number,
     showLabels = true,
-    showLegend,
-    showLabelsThreshold,
-    sliceId,
-    showTotal,
-    roseType,
-    label_template: labelTemplate,
-    threshold_for_other: thresholdForOther,
+    showLegend = true,
+    showLabelsThreshold = 0 as number,
+    sliceId = '' as string,
+    showTotal = true,
+    roseType = '' as string,
+    label_template: labelTemplate = '' as string,
+    threshold_for_other: thresholdForOther = 0 as number,
   } = { ...DEFAULT_FORM_DATA, ...formData };
+
+  const legendType = rawLegendType as LegendType;
 
   const metricLabel = metric ? getMetricLabel(metric) : '';
   const contributionLabel = getContributionLabel(metricLabel);
@@ -214,7 +220,7 @@ export default function transformProps(
     currencyFormats,
     columnFormats,
     numberFormat,
-    currencyFormat,
+    ensureIsCurrency(currencyFormat),
   );
 
   let data = rawData;
@@ -304,7 +310,7 @@ export default function transformProps(
       value,
       name,
       itemStyle: {
-        color: colorFn(name, sliceId),
+        color: colorFn(name, Number(sliceId)),
         opacity: isFiltered
           ? OpacityEnum.SemiTransparent
           : OpacityEnum.NonTransparent,
@@ -412,7 +418,8 @@ export default function transformProps(
     type: 'pie',
     ...chartPadding,
     animation: false,
-    roseType: roseType || undefined,
+    roseType:
+      roseType === 'area' || roseType === 'radius' ? roseType : undefined,
     radius: [`${donut ? innerRadius : 0}%`, `${outerRadius}%`],
     center: ['50%', '50%'],
     avoidLabelOverlap: true,
@@ -476,23 +483,23 @@ export default function transformProps(
           z: 10,
         }
       : undefined,
-    series: [series],
+    series,
   };
-  // =================================================================
-  // DRILLDOWN CHANGE: We are adding new properties to be passed
-  // to the chart component.
-  // =================================================================
-  const drilldownData = {
-    // Use the `groupbyLabels` constant which is already correctly processed
-    // using the `getColumnLabel` utility.
-    hierarchy: groupbyLabels,
-    // The raw data from the query, which we will filter on the client side
-    // when the user drills down.
-    sourceData: rawData,
-    // The metric we are measuring
-    metric: metricLabel,
-  };
-  // =================================================================
+  // // =================================================================
+  // // DRILLDOWN CHANGE: We are adding new properties to be passed
+  // // to the chart component.
+  // // =================================================================
+  // const drilldownData = {
+  //   // Use the `groupbyLabels` constant which is already correctly processed
+  //   // using the `getColumnLabel` utility.
+  //   hierarchy: groupbyLabels,
+  //   // The raw data from the query, which we will filter on the client side
+  //   // when the user drills down.
+  //   sourceData: rawData,
+  //   // The metric we are measuring
+  //   metric: metricLabel,
+  // };
+  // // =================================================================
 
   return {
     ...chartProps,

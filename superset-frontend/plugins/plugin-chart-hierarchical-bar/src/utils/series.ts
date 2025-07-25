@@ -56,18 +56,17 @@ function encodeHTML(str: string): string {
 import type { LegendComponentOption } from 'echarts/components';
 import type { SeriesOption } from 'echarts';
 import { isEmpty, maxBy, meanBy, minBy, orderBy, sumBy } from 'lodash';
-import {
-  NULL_STRING,
-  StackControlsValue,
-  TIMESERIES_CONSTANTS,
-} from '../constants';
+import { NULL_STRING } from '../constants';
+// import { TIMESERIES_CONSTANTS } from '@superset-ui/plugin-chart-echarts/src/constants';
+import { TIMESERIES_CONSTANTS } from '../constants';
+
 import {
   LegendOrientation,
-  EchartsTimeseriesSeriesType,
   LegendType,
   StackType,
-} from '../types';
+} from '@superset-ui/plugin-chart-echarts';
 import { defaultLegendPadding } from '../defaults';
+import { EchartsTimeseriesSeriesType } from '@superset-ui/plugin-chart-echarts';
 
 function isDefined<T>(value: T | undefined | null): boolean {
   return value !== undefined && value !== null;
@@ -284,6 +283,8 @@ export function extractSeries(
     extraMetricLabels?: string[];
     removeNulls?: boolean;
     stack?: StackType;
+    // Add contributionMode to the function's options
+    contributionMode?: 'row' | 'column';
     totalStackedValues?: number[];
     isHorizontal?: boolean;
     sortSeriesType?: SortSeriesType;
@@ -297,7 +298,8 @@ export function extractSeries(
     xAxis = DTTM_ALIAS,
     extraMetricLabels = [],
     removeNulls = false,
-    stack = false,
+    // Destructure contributionMode from the options
+    contributionMode,
     totalStackedValues = [],
     isHorizontal = false,
     sortSeriesType,
@@ -355,7 +357,8 @@ export function extractSeries(
         if (isFillNeighborValue) {
           value = fillNeighborValue;
         } else if (
-          stack === StackControlsValue.Expand &&
+          // This is the corrected logic. It now checks for contributionMode.
+          contributionMode === 'row' &&
           totalStackedValue !== undefined
         ) {
           value = ((value || 0) as number) / totalStackedValue;

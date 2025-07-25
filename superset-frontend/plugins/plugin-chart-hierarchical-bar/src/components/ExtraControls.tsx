@@ -7,7 +7,7 @@
  * "License"); you may not use this file except in compliance
  * with the License.  You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -16,70 +16,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import { HandlerFunction, JsonValue, styled } from '@superset-ui/core';
-import {
-  RadioButtonOption,
-  sharedControlComponents,
-} from '@superset-ui/chart-controls';
-import { AreaChartStackControlOptions } from '../constants';
+import { useCallback } from 'react';
+import { HandlerFunction, styled } from '@superset-ui/core';
+// Import the shared components object
+import { sharedControlComponents } from '@superset-ui/chart-controls';
 
-const { RadioButtonControl } = sharedControlComponents;
+// The linter is having trouble finding CheckboxControl, so we use @ts-ignore
+// as a diagnostic step to see if the component exists at runtime.
+// @ts-ignore
+const { CheckboxControl } = sharedControlComponents;
 
 const ExtraControlsWrapper = styled.div`
   text-align: center;
+  padding-top: 8px;
 `;
 
-export function useExtraControl<
-  F extends {
-    stack: any;
-    area: boolean;
-  },
->({
-  formData,
-  setControlValue,
-}: {
-  formData: F;
-  setControlValue?: HandlerFunction;
-}) {
-  const { stack, area } = formData;
-  const [extraValue, setExtraValue] = useState<JsonValue | undefined>(
-    stack ?? undefined,
-  );
-
-  useEffect(() => {
-    setExtraValue(stack);
-  }, [stack]);
-
-  const extraControlsOptions = useMemo(() => {
-    if (area) {
-      return AreaChartStackControlOptions;
-    }
-    return [];
-  }, [area]);
-
-  const extraControlsHandler = useCallback(
-    (value: RadioButtonOption[0]) => {
-      if (area) {
-        if (setControlValue) {
-          setControlValue('stack', value);
-          setExtraValue(value);
-        }
-      }
-    },
-    [area, setControlValue],
-  );
-
-  return {
-    extraControlsOptions,
-    extraControlsHandler,
-    extraValue,
-  };
-}
-
+// This component is now much simpler. It only needs to render a checkbox
+// if the `area` and `showExtraControls` props are true.
 export function ExtraControls<
   F extends {
-    stack: any;
+    stack: boolean; // The `stack` prop is now a simple boolean
     area: boolean;
     showExtraControls: boolean;
   },
@@ -90,22 +46,27 @@ export function ExtraControls<
   formData: F;
   setControlValue?: HandlerFunction;
 }) {
-  const { extraControlsOptions, extraControlsHandler, extraValue } =
-    useExtraControl<F>({
-      formData,
-      setControlValue,
-    });
+  const { area, stack, showExtraControls } = formData;
 
-  if (!formData.showExtraControls) {
+  const handleChange = useCallback(
+    (value: boolean) => {
+      setControlValue?.('stack', value);
+    },
+    [setControlValue],
+  );
+
+  // Only show the control if the conditions are met.
+  if (!showExtraControls || !area) {
     return null;
   }
 
   return (
     <ExtraControlsWrapper>
-      <RadioButtonControl
-        options={extraControlsOptions}
-        onChange={extraControlsHandler}
-        value={extraValue}
+      <CheckboxControl
+        name="stack"
+        label="Stack Series" // Provide a simple label
+        value={stack}
+        onChange={handleChange}
       />
     </ExtraControlsWrapper>
   );

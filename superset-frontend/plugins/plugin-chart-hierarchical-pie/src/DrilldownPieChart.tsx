@@ -16,12 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useMemo, useCallback, type RefObject } from 'react';
+import { useState, useMemo, type RefObject } from 'react';
 import {
   Behavior,
-  ChartProps,
-  // EchartsEvent,
-  // EventHandlers,
   DataRecord,
   t,
   CategoricalColorNamespace,
@@ -36,7 +33,6 @@ import Echart from '../../plugin-chart-echarts/src/components/Echart';
 import { PieChartTransformedProps } from './types';
 
 import { useRef } from 'react';
-import type { EChartsType } from 'echarts';
 import type { EchartsHandler } from '../../plugin-chart-echarts/src/types';
 
 // Helper function to aggregate data for the current drilldown level.
@@ -142,16 +138,16 @@ export default function DrilldownPieChart(props: PieChartTransformedProps) {
     numberFormatter,
   ]);
 
-  // Handler for when a user clicks a pie slice
-  const onChartClick = useCallback(
-    (params: { name: string }) => {
-      // Only drill down if there are more levels in the hierarchy
-      if (drilldownPath.length < hierarchy.length - 1) {
-        setDrilldownPath([...drilldownPath, params.name]);
-      }
-    },
-    [drilldownPath, hierarchy],
-  );
+  // // Handler for when a user clicks a pie slice
+  // const onChartClick = useCallback(
+  //   (params: { name: string }) => {
+  //     // Only drill down if there are more levels in the hierarchy
+  //     if (drilldownPath.length < hierarchy.length - 1) {
+  //       setDrilldownPath([...drilldownPath, params.name]);
+  //     }
+  //   },
+  //   [drilldownPath, hierarchy],
+  // );
 
   // // Handler for when a user clicks a breadcrumb to go back up
   // const handleBreadcrumbClick = (index: number) => {

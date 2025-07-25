@@ -16,7 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { Currency } from '@superset-ui/core';
+
+export function ensureIsCurrency(input: string | null | undefined): Currency {
+  return (input || '') as unknown as Currency;
+}
+
 export const CONTRIBUTION_SUFFIX = '__contribution' as const;
+
+export const NULL_STRING = '<NULL>';
+
+export const TIMESERIES_CONSTANTS = {
+  legendTopRightOffset: 30,
+  legendRightTopOffset: 20,
+};
 
 export enum OpacityEnum {
   Transparent = 0,
@@ -59,3 +73,6 @@ export const DEFAULT_FORM_DATA = {
   truncateXAxis: true,
   xAxisBounds: [null, null],
 };
+
+export const TOOLTIP_OVERFLOW_MARGIN = 8;
+export const TOOLTIP_POINTER_MARGIN = 5;

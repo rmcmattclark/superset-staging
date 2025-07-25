@@ -27,12 +27,23 @@ import {
   getTimeFormatter,
 } from '@superset-ui/core';
 
-import {
-  BaseTransformedProps,
-  CrossFilterTransformedProps,
-  EventHandlers,
-} from '../types';
+import { ChartProps } from '@superset-ui/core';
+
+type AllEventHandlerProps = ChartProps<any> & {
+  groupby?: string[];
+  onContextMenu?: (x: number, y: number, filters: any) => void;
+  setDataMask: (dataMask: any) => void;
+  emitCrossFilters?: boolean;
+  selectedValues: Record<string, any>;
+  labelMap: Record<string, string[]>;
+  coltypeMapping?: Record<string, number>;
+};
+
+type EventHandlers = NonNullable<ChartProps<any>['hooks']>;
+
 import { formatSeriesName } from './series';
+
+import { SqlaFormData } from '@superset-ui/core';
 
 export type Event = {
   name: string;
@@ -105,9 +116,8 @@ export const clickEventHandler =
 
 export const contextMenuEventHandler =
   (
-    groupby: (BaseTransformedProps<any> &
-      CrossFilterTransformedProps)['groupby'],
-    onContextMenu: BaseTransformedProps<any>['onContextMenu'],
+    groupby: string[] = [],
+    onContextMenu: ((x: number, y: number, filters: any) => void) | undefined,
     labelMap: Record<string, string[]>,
     getCrossFilterDataMask: (
       value: string,
@@ -115,40 +125,42 @@ export const contextMenuEventHandler =
     formData: QueryFormData,
     coltypeMapping?: Record<string, number>,
   ) =>
-  (e: Event) => {
-    if (onContextMenu) {
-      e.event.stop();
-      const pointerEvent = e.event.event;
-      const drillFilters: BinaryQueryObjectFilterClause[] = [];
-      if (groupby.length > 0) {
-        const values = labelMap[e.name];
-        groupby.forEach((dimension, i) => {
-          drillFilters.push({
-            col: dimension,
-            op: '==',
-            val: values[i],
-            formattedVal: formatSeriesName(values[i], {
-              timeFormatter: getTimeFormatter(formData.dateFormat),
-              numberFormatter: getNumberFormatter(formData.numberFormat),
-              coltype: coltypeMapping?.[getColumnLabel(dimension)],
-            }),
-          });
+  (e: any) => {
+    if (!onContextMenu) return;
+
+    e.event.stop();
+    const pointerEvent = e.event.event;
+    const drillFilters: BinaryQueryObjectFilterClause[] = [];
+
+    if (groupby.length > 0) {
+      const values = labelMap[e.name];
+      groupby.forEach((dimension, i) => {
+        drillFilters.push({
+          col: dimension,
+          op: '==',
+          val: values[i],
+          formattedVal: formatSeriesName(values[i], {
+            timeFormatter: getTimeFormatter(formData.dateFormat),
+            numberFormatter: getNumberFormatter(formData.numberFormat),
+            coltype: coltypeMapping?.[getColumnLabel(dimension)],
+          }),
         });
-      }
-      onContextMenu(pointerEvent.clientX, pointerEvent.clientY, {
-        drillToDetail: drillFilters,
-        crossFilter:
-          groupby.length > 0 ? getCrossFilterDataMask(e.name) : undefined,
-        drillBy: { filters: drillFilters, groupbyFieldName: 'groupby' },
       });
     }
+
+    onContextMenu(pointerEvent.clientX, pointerEvent.clientY, {
+      drillToDetail: drillFilters,
+      crossFilter:
+        groupby.length > 0 ? getCrossFilterDataMask(e.name) : undefined,
+      drillBy: { filters: drillFilters, groupbyFieldName: 'groupby' },
+    });
   };
 
 export const allEventHandlers = (
-  transformedProps: BaseTransformedProps<any> & CrossFilterTransformedProps,
-) => {
+  transformedProps: AllEventHandlerProps,
+): EventHandlers => {
   const {
-    groupby,
+    groupby = [],
     onContextMenu,
     setDataMask,
     labelMap,
@@ -157,6 +169,7 @@ export const allEventHandlers = (
     coltypeMapping,
     formData,
   } = transformedProps;
+
   const eventHandlers: EventHandlers = {
     click:
       groupby.length > 0
@@ -171,9 +184,10 @@ export const allEventHandlers = (
       onContextMenu,
       labelMap,
       getCrossFilterDataMask(selectedValues, groupby, labelMap),
-      formData,
+      formData as SqlaFormData,
       coltypeMapping,
     ),
   };
+
   return eventHandlers;
 };
